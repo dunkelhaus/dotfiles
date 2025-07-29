@@ -15,7 +15,6 @@ end
 
 -- For example, changing the color scheme:
 config.color_scheme = 'Monokai Dark'
-config.window_decorations = "RESIZE"
 config.default_cursor_style = 'BlinkingUnderline'
 config.font_size = 15
 
