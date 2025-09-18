@@ -101,3 +101,5 @@ vim.opt.listchars:append {
 	trail = space,
 	nbsp = space
 }
+
+vim.lsp.set_log_level("debug")

@@ -30,7 +30,7 @@ return {
 					timeout_ms = 5000,
 					-- golines will use goimports as base formatter by default which is slow.
 					-- see https://github.com/segmentio/golines/issues/33
-					-- prepend_args = { "--max-len=100" },
+					prepend_args = { "--base-formatter=gofumpt", "--ignore-generated", "--tab-len=1", "--max-len=100" },
 				},
 			},
 		})

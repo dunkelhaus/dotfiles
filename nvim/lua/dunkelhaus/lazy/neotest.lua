@@ -8,6 +8,7 @@ return {
 			"nvim-treesitter/nvim-treesitter",
 			"marilari88/neotest-vitest",
 			"nvim-neotest/neotest-plenary",
+			"nvim-neotest/neotest-python",
 			"nvim-neotest/nvim-nio",
 			{ "fredrikaverpil/neotest-golang", version = "*" },
 		},
@@ -15,6 +16,11 @@ return {
 			opts.adapters = opts.adapters or {}
 			opts.adapters["neotest-golang"] = {
 				go_test_args = { "-v", "-gcflags='-N -l'" },
+			}
+			opts.adapters["neotest-python"] = {
+				runner = "pytest",
+				args = { "--log-level", "DEBUG", "--color", "yes", "-vv", "-s" },
+				dap = { justMyCode = false },
 			}
 		end,
 		config = function()

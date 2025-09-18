@@ -1,8 +1,8 @@
 return {
-    {
-        "github/copilot.vim",
+	{
+		"github/copilot.vim",
 		event = "VeryLazy",
-        config = function()
+		config = function()
 			vim.g.copilot_filetypes = {
 				["TelescopePrompt"] = false,
 			}
@@ -14,6 +14,6 @@ return {
 				"i", "<C-j>", 'copilot#Accept("\\<CR>")',
 				{ expr = true, replace_keycodes = false }
 			)
-        end
-    },
+		end
+	},
 }

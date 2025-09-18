@@ -1,8 +1,9 @@
 return {
 	"neovim/nvim-lspconfig",
 	dependencies = {
-		"williamboman/mason.nvim",
-		"williamboman/mason-lspconfig.nvim",
+		"mason-org/mason.nvim",
+		"mason-org/mason-lspconfig.nvim",
+		"WhoIsSethDaniel/mason-tool-installer.nvim",
 		"hrsh7th/cmp-nvim-lsp",
 		"hrsh7th/cmp-buffer",
 		"hrsh7th/cmp-path",
@@ -14,7 +15,7 @@ return {
 	},
 
 	config = function()
-		local cmp = require('cmp')
+		local cmp = require("cmp")
 		local cmp_lsp = require("cmp_nvim_lsp")
 		local capabilities = vim.tbl_deep_extend(
 			"force",
@@ -22,111 +23,127 @@ return {
 			vim.lsp.protocol.make_client_capabilities(),
 			cmp_lsp.default_capabilities())
 
-		require("fidget").setup({})
-		require("mason").setup()
-		require("mason-lspconfig").setup({
-			ensure_installed = {
-				"lua_ls",
-				"rust_analyzer",
-				"gopls",
-				"jsonls",
-				"basedpyright",
-				"ruff",
-			},
-			handlers = {
-				function(server_name) -- default handler (optional)
-					require("lspconfig")[server_name].setup {
-						capabilities = capabilities
-					}
-				end,
-				["gopls"] = function()
-					local lspconfig = require("lspconfig")
-					lspconfig.gopls.setup {
-						capabilities = capabilities,
-						filetypes = { "go", "gomod", "gowork", "gotmpl" },
-						root_dir = lspconfig.util.root_pattern("go.mod", ".git"),
-						cmd = { "gopls" },
-						settings = {
-							gopls = {
-								analyses = {
-									unusedparams = true,
-								},
-								staticcheck = true,
-								gofumpt = false,
-							},
-						},
-					}
-				end,
-				zls = function()
-					local lspconfig = require("lspconfig")
-					lspconfig.zls.setup({
-						root_dir = lspconfig.util.root_pattern(".git", "build.zig", "zls.json"),
-						settings = {
-							zls = {
-								enable_inlay_hints = true,
-								enable_snippets = true,
-								warn_style = true,
-							},
-						},
-					})
-					vim.g.zig_fmt_parse_errors = 0
-					vim.g.zig_fmt_autosave = 0
-				end,
-				["lua_ls"] = function()
-					local lspconfig = require("lspconfig")
-					lspconfig.lua_ls.setup {
-						capabilities = capabilities,
-						settings = {
-							Lua = {
-								runtime = { version = "Lua 5.1" },
-								diagnostics = {
-									globals = { "bit", "vim", "it", "describe", "before_each", "after_each" },
-								}
-							}
+		vim.lsp.config("*", {
+			capabilities = capabilities,
+		})
+
+		local servers = {
+			---@type vim.lsp.Config
+			lua_ls = {
+				settings = {
+					Lua = {
+						runtime = { version = "Lua 5.1" },
+						diagnostics = {
+							globals = { "bit", "vim", "it", "describe", "before_each", "after_each" },
 						}
 					}
-				end,
-				basedpyright = function()
-					local lspconfig = require("lspconfig")
-					lspconfig.basedpyright.setup {
-						capabilities = capabilities,
-						-- https://docs.basedpyright.com/#/settings
-						settings = {
-							basedpyright = {
-								disableOrganizeImports = true, -- use ruff lsp for this instead
-								analysis = {
-									-- NOTE: uncomment this to ignore linting. Good for projects where
-									-- basedpyright lights up as a christmas tree.
-									ignore = { "*" },
-								},
-							},
+				}
+			},
+
+			---@type vim.lsp.Config
+			gopls = {
+				cmd = { "gopls" },
+				filetypes = { "go", "gomod", "gowork", "gotmpl", "gosum" },
+				root_markers = { "go.work", "go.mod", ".git" },
+				settings = {
+					gopls = {
+						analyses = {
+							unusedparams = true,
 						},
-					}
+						staticcheck = true,
+						gofumpt = false,
+					},
+				},
+			},
+
+			---@type vim.lsp.Config
+			ruff = {
+				cmd = { "ruff", "server" },
+				filetypes = { "python" },
+				root_dir = (function()
+					return vim.fs.root(0, {
+						"pyproject.toml",
+						"ruff.toml",
+						".ruff.toml",
+						"requirements.txt",
+						"uv.lock",
+						"setup.py",
+						"setup.cfg",
+						"Pipfile",
+						"pyrightconfig.json",
+						".git",
+					})
+				end)(),
+				on_attach = function(client, bufnr)
+					if client.name == "ruff" then
+						-- Disable hover in favor of Pyright
+						client.server_capabilities.hoverProvider = false
+					end
 				end,
-				ruff = function()
-					local lspconfig = require("lspconfig")
-					lspconfig.ruff.setup {
-						capabilities = capabilities,
-						-- https://docs.astral.sh/ruff/editors/
-						on_attach = function(client, bufnr)
-							if client.name == "ruff" then
-								-- Disable hover in favor of Pyright
-								client.server_capabilities.hoverProvider = false
-							end
-						end,
-						init_options = {
-							settings = {
-								configurationPreference = "filesystemFirst",
-								lineLength = 88,
-								lint = {
-									enabled = true, -- NOTE: it does not work to disable this.
-								},
-							},
+				init_options = {
+					settings = {
+						configurationPreference = "filesystemFirst",
+						lineLength = 88,
+					},
+				},
+				settings = {
+					ruff = {},
+				},
+			},
+
+			---@type vim.lsp.Config
+			basedpyright = {
+				cmd = { "basedpyright-langserver", "--stdio" },
+				filetypes = { "python" },
+				root_markers = {
+					"pyproject.toml",
+					"ruff.toml",
+					".ruff.toml",
+					"requirements.txt",
+					"uv.lock",
+					"setup.py",
+					"setup.cfg",
+					"Pipfile",
+					"pyrightconfig.json",
+					".git",
+				},
+				settings = {
+					python = {
+						venvPath = vim.fn.getenv("VIRTUAL_ENV"),
+						pythonPath = vim.fn.exepath("python"),
+					},
+					basedpyright = {
+						disableOrganizeImports = true, -- use ruff lsp for this instead
+						analysis = {
+							-- ignore = { "*" }, -- NOTE: uncomment this to ignore linting.
+							autoSearchPaths = true,
+							useLibraryCodeForTypes = true,
+							diagnosticMode = "openFilesOnly",
 						},
-					}
-				end,
-			}
+					},
+				},
+			},
+		}
+
+		require("fidget").setup({})
+		require("mason").setup()
+		require("mason-lspconfig").setup {
+			automatic_enable = true,
+		}
+
+		local ensure_installed = vim.tbl_keys(servers or {})
+		vim.list_extend(ensure_installed, {
+			"jsonls",
 		})
+		require("mason-tool-installer").setup {
+			ensure_installed = ensure_installed,
+		}
+
+		-- Installed LSPs are configured and enabled automatically with mason-lspconfig
+		-- The loop below is for overriding the default configuration of LSPs with the ones in the servers table
+		for server_name, config in pairs(servers) do
+			vim.lsp.config(server_name, config)
+		end
 
 		local cmp_select = { behavior = cmp.SelectBehavior.Select }
 
