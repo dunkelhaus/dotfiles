@@ -2,17 +2,6 @@ require("dunkelhaus.set")
 require("dunkelhaus.remap")
 require("dunkelhaus.lazy_init")
 
--- DO.not
--- DO NOT INCLUDE THIS
-
--- If i want to keep doing lsp debugging
--- function restart_htmx_lsp()
---     require("lsp-debug-tools").restart({ expected = {}, name = "htmx-lsp", cmd = { "htmx-lsp", "--level", "DEBUG" }, root_dir = vim.loop.cwd(), });
--- end
-
--- DO NOT INCLUDE THIS
--- DO.not
-
 local augroup = vim.api.nvim_create_augroup
 local DunkelhausGroup = augroup('Dunkelhaus', {})
 
@@ -89,6 +78,17 @@ vim.api.nvim_create_autocmd("FileType", {
 	callback = function()
 		-- set JSON Schema specific options
 		vim.opt_local.expandtab = true
+	end,
+})
+
+vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
+	pattern = { os.getenv("HOME") .. "/.local/share/chezmoi/*" },
+	callback = function(ev)
+		local bufnr = ev.buf
+		local edit_watch = function()
+			require("chezmoi.commands.__edit").watch(bufnr)
+		end
+		vim.schedule(edit_watch)
 	end,
 })
 
