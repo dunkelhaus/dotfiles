@@ -93,7 +93,7 @@ return {
 
 			---@type vim.lsp.Config
 			basedpyright = {
-				cmd = { "basedpyright-langserver", "--stdio" },
+				cmd = { "uv", "run", "basedpyright-langserver", "--stdio" },
 				filetypes = { "python" },
 				root_markers = {
 					"pyproject.toml",
@@ -123,6 +123,9 @@ return {
 					},
 				},
 			},
+
+			---@type vim.lsp.Config
+			copilot = {},
 		}
 
 		require("fidget").setup({})
