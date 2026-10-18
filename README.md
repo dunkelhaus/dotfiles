@@ -21,15 +21,6 @@ sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply --ssh dunkelhaus
 This installs chezmoi, clones the repo to `~/.local/share/chezmoi`, and writes the
 config files into the home directory. Neovim installs its plugins on first use.
 
-This machine keeps the source repo at `~/code/dotfiles` instead. To copy that setup:
-
-```sh
-git clone git@github.com:dunkelhaus/dotfiles.git ~/code/dotfiles
-mkdir -p ~/.config/chezmoi
-printf 'sourceDir = "~/code/dotfiles"\n' > ~/.config/chezmoi/chezmoi.toml
-chezmoi apply
-```
-
 ## Daily use
 
 | Command | Purpose |
