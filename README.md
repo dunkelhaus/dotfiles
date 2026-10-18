@@ -6,7 +6,7 @@ Managed today:
 
 - neovim, `~/.config/nvim` (lazy.nvim, Copilot Chat, LSP for python and go)
 - wezterm, `~/.config/wezterm`
-- opencode, `~/.config/opencode`. `service.json` is not managed. It holds a local password.
+- opencode, `~/.config/opencode`. `service.json` is not managed.
 
 Note: `.chezmoiignore` keeps `README.md` out of the home directory.
 
