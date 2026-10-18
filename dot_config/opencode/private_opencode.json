@@ -1,0 +1,17 @@
+{
+  "plugins": [
+    "@tarquinen/opencode-dcp@latest",
+    "opencode-snip@v3.0.0-next.1"
+  ],
+  "mcp": {
+    "servers": {
+      "colab-mcp": {
+        "type": "local",
+        "command": [
+          "uvx",
+          "git+https://github.com/googlecolab/colab-mcp"
+        ]
+      }
+    }
+  }
+}
